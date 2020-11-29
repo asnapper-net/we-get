@@ -113,7 +113,7 @@ def msg_error(msg, exit):
       @msg: string.
       @exit  : exit?
     """
-    sys.stdout.write("%s# error: %s\n" % (Fore.RED, msg))
+    sys.stderr.write("%s# bla error: %s\n" % (Fore.RED, msg))
     if exit:
         sys.exit(1)
 
