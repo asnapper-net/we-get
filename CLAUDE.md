@@ -762,6 +762,7 @@ These need decisions before / during implementation:
 - **Secrets:** Always via External Secrets → mounted env vars. Never in code or git.
 - **Commits:** Conventional Commits. PRs must reference a Jira ticket.
 - **No comments explaining what the code does** — code should be self-documenting. Comments only for *why*, not *what*.
+- **PR monitoring:** After opening a PR or pushing to an existing one, always call `subscribe_pr_activity` for that PR. Automatically address any review comments or CI failures that arrive as `<github-webhook-activity>` events: fix and push if the change is clear and small; ask the author first if it is ambiguous or architecturally significant; reply with an explanation if no code change is needed.
 
 When implementing a component, follow this order: types/schemas → tests (red) → implementation (green) → integration test → docs update.
 

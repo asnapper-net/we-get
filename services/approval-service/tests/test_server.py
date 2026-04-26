@@ -182,10 +182,12 @@ async def test_create_approval_request_invalid_phase_returns_422() -> None:
 
 async def test_slack_interactions_approve() -> None:
     ts = str(int(time.time()))
-    body = json.dumps({
-        "actions": [{"action_id": "approve", "value": "wf-1"}],
-        "user": {"id": "U123"},
-    }).encode()
+    body = json.dumps(
+        {
+            "actions": [{"action_id": "approve", "value": "wf-1"}],
+            "user": {"id": "U123"},
+        }
+    ).encode()
     sig = _sign(body, ts)
     with (
         patch.object(settings, "slack_signing_secret", "test-secret"),
@@ -207,10 +209,12 @@ async def test_slack_interactions_approve() -> None:
 
 async def test_slack_interactions_reject() -> None:
     ts = str(int(time.time()))
-    body = json.dumps({
-        "actions": [{"action_id": "reject", "value": "wf-2"}],
-        "user": {"id": "U456"},
-    }).encode()
+    body = json.dumps(
+        {
+            "actions": [{"action_id": "reject", "value": "wf-2"}],
+            "user": {"id": "U456"},
+        }
+    ).encode()
     sig = _sign(body, ts)
     with (
         patch.object(settings, "slack_signing_secret", "test-secret"),
@@ -232,10 +236,12 @@ async def test_slack_interactions_reject() -> None:
 
 async def test_slack_interactions_request_changes_returns_modal() -> None:
     ts = str(int(time.time()))
-    body = json.dumps({
-        "actions": [{"action_id": "request_changes", "value": "wf-3"}],
-        "user": {"id": "U789"},
-    }).encode()
+    body = json.dumps(
+        {
+            "actions": [{"action_id": "request_changes", "value": "wf-3"}],
+            "user": {"id": "U789"},
+        }
+    ).encode()
     sig = _sign(body, ts)
     with patch.object(settings, "slack_signing_secret", "test-secret"):
         async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
@@ -272,13 +278,17 @@ async def test_slack_interactions_bad_signature_returns_401() -> None:
 
 
 async def test_modal_submit_calls_finalize() -> None:
-    body = json.dumps({
-        "view": {
-            "private_metadata": "wf-10",
-            "state": {"values": {"feedback": {"feedback_input": {"value": "Needs more tests"}}}},
-        },
-        "user": {"id": "U999"},
-    }).encode()
+    body = json.dumps(
+        {
+            "view": {
+                "private_metadata": "wf-10",
+                "state": {
+                    "values": {"feedback": {"feedback_input": {"value": "Needs more tests"}}}
+                },
+            },
+            "user": {"id": "U999"},
+        }
+    ).encode()
     with patch("approval_service.server._finalize", AsyncMock()) as mock_fin:
         async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             resp = await client.post(
