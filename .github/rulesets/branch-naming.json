@@ -1,0 +1,22 @@
+{
+  "name": "branch-naming",
+  "target": "branch",
+  "enforcement": "active",
+  "conditions": {
+    "ref_name": {
+      "include": ["~ALL"],
+      "exclude": ["refs/heads/master"]
+    }
+  },
+  "rules": [
+    {
+      "type": "branch_name_pattern",
+      "parameters": {
+        "name": "Only feature/* and hotfix/* branches allowed",
+        "negate": false,
+        "operator": "regex",
+        "pattern": "^(feature\\/.+|hotfix\\/.+)$"
+      }
+    }
+  ]
+}
