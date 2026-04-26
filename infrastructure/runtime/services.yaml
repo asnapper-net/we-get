@@ -1,0 +1,131 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: approval-service
+  namespace: agents-services
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: approval-service
+  template:
+    metadata:
+      labels:
+        app: approval-service
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+      containers:
+        - name: approval-service
+          image: ghcr.io/asnapper-net/agent-platform/approval-service:latest
+          ports:
+            - containerPort: 8001
+          envFrom:
+            - secretRef:
+                name: approval-service-secrets
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8001
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: approval-service
+  namespace: agents-services
+spec:
+  selector:
+    app: approval-service
+  ports:
+    - port: 8001
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: approval-service
+  namespace: agents-services
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+spec:
+  rules:
+    - host: approval.agents.internal
+      http:
+        paths:
+          - path: /slack
+            pathType: Prefix
+            backend:
+              service:
+                name: approval-service
+                port:
+                  number: 8001
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pr-orchestrator
+  namespace: agents-services
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: pr-orchestrator
+  template:
+    metadata:
+      labels:
+        app: pr-orchestrator
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+      containers:
+        - name: pr-orchestrator
+          image: ghcr.io/asnapper-net/agent-platform/pr-orchestrator:latest
+          ports:
+            - containerPort: 8002
+          envFrom:
+            - secretRef:
+                name: pr-orchestrator-secrets
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8002
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pr-orchestrator
+  namespace: agents-services
+spec:
+  selector:
+    app: pr-orchestrator
+  ports:
+    - port: 8002
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: pr-orchestrator
+  namespace: agents-services
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+spec:
+  rules:
+    - host: pr-orchestrator.agents.internal
+      http:
+        paths:
+          - path: /github
+            pathType: Prefix
+            backend:
+              service:
+                name: pr-orchestrator
+                port:
+                  number: 8002

@@ -1,0 +1,30 @@
+[tool.uv.workspace]
+members = [
+    "orchestrator",
+    "agents/_base",
+    "agents/pm",
+    "agents/architect",
+    "agents/engineer",
+    "agents/qa",
+    "agents/reviewer",
+    "agents/devops",
+    "services/approval-service",
+    "services/pr-orchestrator",
+]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+ignore = ["B008"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests", "orchestrator/tests", "services"]
