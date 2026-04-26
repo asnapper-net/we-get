@@ -130,3 +130,47 @@ async def test_webhook_rejects_bad_signature() -> None:
                 },
             )
     assert resp.status_code == 401
+
+
+# ---------------------------------------------------------------------------
+# /pr-status endpoint
+# ---------------------------------------------------------------------------
+
+
+def _mock_conn(row: object) -> object:
+    from unittest.mock import AsyncMock, MagicMock
+
+    cursor = MagicMock()
+    cursor.fetchone = AsyncMock(return_value=row)
+
+    conn = AsyncMock()
+    conn.execute = AsyncMock(return_value=cursor)
+    conn.__aenter__ = AsyncMock(return_value=conn)
+    conn.__aexit__ = AsyncMock(return_value=False)
+    return conn
+
+
+async def test_pr_status_returns_row() -> None:
+    import psycopg
+
+    row = ("org/repo", 5, "abc123", 0, "approve", "approve", None, None, None)
+    mock_conn = _mock_conn(row)
+    with patch.object(psycopg.AsyncConnection, "connect", AsyncMock(return_value=mock_conn)):
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+            resp = await client.get("/pr-status/org/repo/5")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["repo"] == "org/repo"
+    assert data["pr_number"] == 5
+    assert data["head_sha"] == "abc123"
+    assert data["qa_decision"] == "approve"
+
+
+async def test_pr_status_not_found_returns_404() -> None:
+    import psycopg
+
+    mock_conn = _mock_conn(None)
+    with patch.object(psycopg.AsyncConnection, "connect", AsyncMock(return_value=mock_conn)):
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+            resp = await client.get("/pr-status/org/repo/999")
+    assert resp.status_code == 404
