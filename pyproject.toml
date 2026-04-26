@@ -27,12 +27,12 @@ ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
-testpaths = ["tests"]
-addopts = "--import-mode=importlib"
-pythonpath = [
-    "orchestrator/src",
-    "agents/_base/src",
-    "agents/pm/src",
-    "services/approval-service/src",
-    "services/pr-orchestrator/src",
+testpaths = [
+    "orchestrator/tests",
+    "agents/_base/tests",
+    "agents/pm/tests",
+    "services/approval-service/tests",
+    "services/pr-orchestrator/tests",
+    "tests",
 ]
+addopts = "--import-mode=importlib"
