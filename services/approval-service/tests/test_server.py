@@ -76,6 +76,30 @@ def test_verify_slack_signature_invalid_timestamp_raises_400(ts: str) -> None:
     assert exc.value.status_code == 400
 
 
+@pytest.mark.parametrize("ts", ["nan", "inf", "-inf"])
+def test_verify_slack_signature_non_finite_timestamp_raises_400(ts: str) -> None:
+    body = b"payload=test"
+    sig = _sign(body, ts)
+    with (
+        patch.object(settings, "slack_signing_secret", "test-secret"),
+        pytest.raises(HTTPException) as exc,
+    ):
+        _verify_slack_signature(body, sig, ts)
+    assert exc.value.status_code == 400
+
+
+def test_verify_slack_signature_non_utf8_body_raises_400() -> None:
+    body = b"\xff\xfe invalid utf-8"
+    ts = str(int(time.time()))
+    # signature value doesn't matter — function raises before it reaches comparison
+    with (
+        patch.object(settings, "slack_signing_secret", "test-secret"),
+        pytest.raises(HTTPException) as exc,
+    ):
+        _verify_slack_signature(body, "v0=irrelevant", ts)
+    assert exc.value.status_code == 400
+
+
 # ---------------------------------------------------------------------------
 # _channel_for_phase
 # ---------------------------------------------------------------------------
