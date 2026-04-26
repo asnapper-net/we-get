@@ -12,6 +12,7 @@ dependencies = [
     "structlog>=24.1",
     "aio-pika>=9.4",
     "slack-sdk>=3.27",
+    "aiohttp>=3.9",
 ]
 
 [project.optional-dependencies]

@@ -1,6 +1,7 @@
 import hashlib
 import hmac
 import json
+import math
 import time
 from typing import Annotated, Any
 
@@ -116,9 +117,19 @@ async def _finalize(workflow_id: str, decision: str, approver: str, feedback: st
 
 
 def _verify_slack_signature(body: bytes, signature: str, timestamp: str) -> None:
-    if abs(time.time() - float(timestamp)) > 300:
+    try:
+        ts = float(timestamp)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="invalid timestamp") from None
+    if not math.isfinite(ts):
+        raise HTTPException(status_code=400, detail="invalid timestamp")
+    if abs(time.time() - ts) > 300:
         raise HTTPException(status_code=400, detail="timestamp too old")
-    base = f"v0:{timestamp}:{body.decode()}"
+    try:
+        body_str = body.decode("utf-8")
+    except UnicodeDecodeError:
+        raise HTTPException(status_code=400, detail="invalid request encoding") from None
+    base = f"v0:{timestamp}:{body_str}"
     expected = (
         "v0="
         + hmac.new(
