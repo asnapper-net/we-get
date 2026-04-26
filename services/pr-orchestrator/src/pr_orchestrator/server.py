@@ -36,9 +36,9 @@ async def github_webhook(
     handler = _EVENT_HANDLERS.get(x_github_event)
     if handler:
         await handler(payload)
-        log.info("webhook.handled", event=x_github_event)
+        log.info("webhook.handled", github_event=x_github_event)
     else:
-        log.debug("webhook.ignored", event=x_github_event)
+        log.debug("webhook.ignored", github_event=x_github_event)
 
     return {"ok": True}
 

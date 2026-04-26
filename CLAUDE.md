@@ -753,7 +753,7 @@ These need decisions before / during implementation:
 
 - **Language:** Python 3.12 for all services. Type hints required (`mypy --strict`).
 - **Framework:** FastAPI for HTTP services. LangGraph for orchestration.
-- **Testing:** `pytest` with `pytest-asyncio`. Aim for ≥80% coverage on agent logic.
+- **Testing:** `pytest` with `pytest-asyncio`. Every non-trivial piece of code **must** have unit tests — this is non-negotiable. "Non-trivial" means anything beyond pure data declarations (Pydantic models, TypedDicts, settings classes) and single-line configuration. Concretely: all routing functions, all parsing/extraction helpers, all HTTP endpoints (including error paths), all business-logic functions in service handlers, and all stateful node logic must be covered. Aim for ≥80% line coverage on agent logic and service handlers; pure config/schema files are exempt. Test files live next to the code they test (`<package>/tests/`). When adding a feature, write the tests in the same PR.
 - **Linting:** `ruff` (formatter + linter). `mypy` in CI.
 - **Dependency management:** `uv` for speed.
 - **Containers:** Multi-stage Dockerfiles, distroless runtime image, non-root user.
